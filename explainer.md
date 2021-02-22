@@ -6,7 +6,7 @@
 
 Many data audit solutions require a cryptographically verifiable method of
 validating the source of data, and the entities who processed that data. Records
-of the data being sent or received, or just the meta data of the parties, are
+of the data being sent or received, or just the meta-data of the parties, are
 not verifiable and can easily be faked. As such existing logs are open to
 dispute.
 
@@ -15,11 +15,12 @@ the processors of transaction data in a form that is cryptographically
 verifiable. OWIDs can optionally include additional data added by the processor
 to the transaction.
 
-A complex transaction involving multiple is fully auditable when all processors
-record their receipt or transmission of the unique identifier associated with
-the transaction using OWIDs. OWIDs can be associated with one another to form a
-tree that represents all the processors involved in a complex transaction with
-the originating unique transaction identifier forming the root of the tree.
+A complex transaction involving multiple organizations is fully auditable when
+all processors record their receipt or transmission of the unique identifier
+associated with the transaction using OWIDs. OWIDs can be associated with one
+another to form a tree that represents all the processors involved in a complex
+transaction with the originating unique transaction identifier forming the root
+of the tree.
 
 A concrete implementation of OWID is available the Go programming language under
 the [owid-go](https://github.com/51degrees/owid-go) repo.
@@ -35,41 +36,54 @@ purposes of signing data.
 The following is a non-exhaustive list of data that could be supported by OWID.
 
 -   Pseudonymous identifiers used to relate multiple activities from the same
-    device or person. For example, a common browser identifier, or the hash of
-    an email address.
+    application or device. For example, a common browser identifier, or mobile
+    advertising identifier
+    ([MAID](https://www.adsquare.com/mobile-advertising-ids-or-finding-the-right-mobile-users)).
 
 -   Directly identifiable personal information. For example, name, email or
     telephone number.
 
 -   Privacy or consent preferences.
 
--   Data processors signalling their compliance with laws such as GDPR or CCPA.
+-   Data processors signaling their compliance with laws such as GDPR or CCPA.
 
 ## Design Considerations
 
-The following concepts and goals were considered in the design of OWIDs.
+The following user cases and goals were considered in the design of OWIDs.
 
--   Support for single transactions that involve thousands of unique processors.
+-   Scale
 
--   Use in environments where trillions of transactions will be generated daily.
+    -   Support for single transactions that involve thousands of unique
+        processors.
 
--   Random audit of entire transactions and all the associated processors. No
-    processor should ever be aware of the transactions that will be audited by
-    others.
+    -   Use in environments where trillions of transactions will be generated
+        daily.
 
--   Partial audits of specific entities involved in a transaction.
+-   Audit
 
--   Offline processing to support situations where data exchange does not occur
-    in real time. For example, where data is transmitted for machine learning
-    purposes after the real time component of the transaction has been
-    completed.
+    -   Random audit of entire transactions and all the associated processors.
+        No processor should ever be aware of the transactions that will be
+        audited by others.
 
--   Online processing where data is sent and received in real time.
+    -   Partial audits of specific entities involved in a transaction.
 
--   Simple deployed for implementors where this does not conflict with other
-    design considerations.
+-   Scope
 
--   Minimise computing and data storage overhead.
+    -   Offline processing to support situations where data exchange does not
+        occur in real time. For example, where data is transmitted for machine
+        learning purposes after the real time component of the transaction has
+        been completed.
+
+    -   Online processing where data is sent and received in real time.
+
+-   Ease of adoption
+
+    -   Simple deployed for implementors where this does not conflict with other
+        design considerations.
+
+-   Efficiency
+
+    -   Minimize computing and data storage overhead.
 
 ## Implementation Considerations
 
@@ -78,7 +92,7 @@ The following considerations have been applied to the implementation.
 -   Each processor must operate at least one domain to host OWID. For example,
     the processor ACME might use the domain acme.org to implement OWID.
 
--   Binary data structures are used in favour of more widely used human readable
+-   Binary data structures are used in favor of more widely used human readable
     formats like JSON or XML to reduce data storage and transmission costs.
 
 -   A single cryptographic signing algorithm. Implementors are not free to
@@ -98,7 +112,7 @@ OWID was inspired by [JWT](https://jwt.io/) and adopted some similar conventions
 and names such as payload and signature.
 
 JWT were considered as a basis for OWIDs but do not meet all the design goals.
-Specifically JWT provides flexibility concerning a choice of algorithm and uses
+Specifically, JWT provides flexibility concerning a choice of algorithm and uses
 JSON for data storage. JSON as a data structure is less efficient than binary
 data structures. Using a single algorithm reduces implementation complexity.
 
@@ -125,9 +139,8 @@ deployed version.
 
 ### Compliance
 
-Complying with GDPR or any other law is a matter for web authors, data
-controllers or data processors privacy counsel and is solely a matter for
-implementors and is not within the scope of OWID.
+Complying with GDPR or any other regional law is a matter for web authors, data
+controllers or data processors and the advice of their privacy counsel.
 
 ### Encryption
 
@@ -152,16 +165,17 @@ transaction. For advertising supply chain audit this use case is covered in
 
 ## Definitions
 
-| Term      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Creator   | The processor that generated the OWID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Processor | The entity that is processing the data associated with the OWID. This explanation does not assign an identical meaning to “Processor” or “Data Processor” as GDPR although they do overlap.                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Payload   | The bytes that are optionally included in the OWID and which form part of the data used to sign the OWID. A payload does not need to be provided if the OWID is recording that some other data stored elsewhere has been processed by the creator.                                                                                                                                                                                                                                                                                                                                                               |
-| Version   | A single byte indicating the version of the OWID. Always the first byte of the array. 1 is the current version.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Domain    | The domain that is associated with the OWID. The registration information associated with the domain must provide contact details for other entities seeking to consume and verify the OWID. The domain can not be marked private or hidden behind a registrar. Well known end points must be exposed by the domain to support retrieval of the Processor’s common name, or public keys. Optional end points might be provided to support verification of OWIDs. See [End Points](#\End Points). The number of characters used for a domain should be as small as possible. As such it is expected OWID creators |
-| Signature | The byte array embedded into the OWID. The OWID cannot be changed after it has been signed. It becomes immutable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| Date      | The date the OWID was created in UTC.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Parent    | OWID can be stand alone and not relate to other OWIDs. Where an OWID is dependent on another OWID then a parent child relationship is formed. The OWIDs could be considered to form a tree.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Term        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Creator     | The processor that generated the OWID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Date        | The date the OWID was created in UTC.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Domain      | The domain that is associated with the Creator of the OWID. The registration information associated with the domain must provide contact details for other entities seeking to consume and verify the OWID. The domain can not be marked private or hidden behind a registrar. Well known end points must be exposed by the domain to support retrieval of the Processor’s common name, or public keys. Optional end points might be provided to support verification of OWIDs. See [End Points](\#\\End Points). The number of characters used for a domain should be as small as possible. As such it is expected OWID creators |
+| Implementor | The entity that implements OWID. May be the same as the Creator or could be an agent operating on behalf of the Creator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Parent      | OWID can be stand alone and not relate to other OWIDs. Where an OWID is dependent on another OWID then a parent child relationship is formed. The OWIDs could be considered to form a tree.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Payload     | The bytes that are optionally included in the OWID and which form part of the data used to sign the OWID. A payload does not need to be provided if the OWID is recording that some other data stored elsewhere has been processed by the creator.                                                                                                                                                                                                                                                                                                                                                                                |
+| Processor   | The entity that is processing the data associated with the OWID. This explanation does not assign an identical meaning to “Processor” or “Data Processor” as GDPR although they do overlap.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Signature   | The byte array embedded into the OWID. The OWID cannot be changed after it has been signed. It becomes immutable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Version     | A single byte indicating the version of the OWID. Always the first byte of the array. 1 is the current version.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## Data Structure
 
@@ -227,5 +241,5 @@ endpoint of the other processors.
 
 OWID assumes the relationship between a domain and an processing entity can be
 established via the existing infrastructure for DNS and SSL certificates. If
-this proves un true then it would be possible for a bad actor to impersonate
-another entity via hijacking the domains of others.
+this proves un true then it would be possible for a bad actor to temporarily
+impersonate another entity via hijacking the domains of others.
