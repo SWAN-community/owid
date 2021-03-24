@@ -1,4 +1,4 @@
 [submodule "go"]
 	path = go
-	url = https://github.com/51Degrees/owid-go.git
+	url = https://github.com/SWAN-community/owid-go.git
 	branch = main

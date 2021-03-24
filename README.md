@@ -19,4 +19,4 @@ Read the [explainer](explainer.md).
 # Use Case: Digital Advertising
 
 If you want to know more about the use of OWID for advertising visit [Secure Web
-Addressability Network (SWAN)](https://github.com/51Degrees/swan).
+Addressability Network (SWAN)](https://github.com/SWAN-community/swan).

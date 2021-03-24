@@ -23,7 +23,7 @@ transaction with the originating unique transaction identifier forming the root
 of the tree.
 
 A concrete implementation of OWID is available the Go programming language under
-the [owid-go](https://github.com/51degrees/owid-go) repo.
+the [owid-go](https://github.com/SWAN-community/owid-go) repo.
 
 ## Pre-requisites
 
@@ -161,7 +161,7 @@ tools is not required.
 
 The process for assembling multiple OWIDs for the purposes of verifying a
 transaction. For advertising supply chain audit this use case is covered in
-[SWAN](https://github.com/51Degrees/swan).
+[SWAN](https://github.com/SWAN-community/swan).
 
 ## Definitions
 
