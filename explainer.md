@@ -22,8 +22,11 @@ another to form a tree that represents all the processors involved in a complex
 transaction with the originating unique transaction identifier forming the root
 of the tree.
 
-A concrete implementation of OWID is available the Go programming language under
-the [owid-go](https://github.com/SWAN-community/owid-go) repo.
+Concrete implementations of OWID are available in the following repositories.
+
+-   [.NET](https://github.com/SWAN-community/owid-dotnet) (version 5+)
+-   [Go](https://github.com/SWAN-community/owid-go)
+-   [JavaScript](https://github.com/SWAN-community/owid-js) (verify only)
 
 ## Pre-requisites
 
@@ -42,7 +45,7 @@ The following is a non-exhaustive list of data that could be supported by OWID.
 -   Directly identifiable personal information. For example, name, email or
     telephone number.
 -   Privacy or consent preferences.
--   Data processors signaling their compliance with laws such as GDPR or CCPA.
+-   Data processors signalling their compliance with laws such as GDPR or CCPA.
 
 ## Design Considerations
 
@@ -101,10 +104,11 @@ data structures. Using a single algorithm reduces implementation complexity.
 
 OWID is dependent on the following IETF standards.
 
--   PKCS \#1 Version 1.5 [[RFC 2313](https://tools.ietf.org/html/rfc2313)]
+-   ECDSA NIST P-256 (FIPS 186-3, section D.2.3), also known as secp256r1 or
+    prime256v1
 
-PKCS \#1 Version 1.5 has been chosen because of the relatively large number of
-programming languages and libraries that offer support. Simple and consistent
+P-256 has been chosen because of the relatively large number of programming
+languages and libraries that offer support. Simple and consistent
 implementations exist in JavaScript and Go. This algorithm is also comparatively
 fast.
 
@@ -112,9 +116,9 @@ As the algorithm is only used to sign and verify data the encryption drawbacks
 are mitigated. The computing costs associated with a bad actor faking signatures
 at scale is likely to be unjustifiably expensive.
 
-Future versions of OWID could use a different cryptographic algorithm. If
-auditors require a more modern algorithm this could be included in the first
-deployed version.
+Future versions of OWID could use a different cryptographic algorithm or larger
+sizes. If auditors require a more modern algorithm this could be included in the
+first deployed version.
 
 ## Out of Scope
 
@@ -149,7 +153,7 @@ transaction. For advertising supply chain audit this use case is covered in
 | Term        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 |-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Creator     | The processor that generated the OWID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Date        | The date the OWID was created in UTC.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Date        | The date the OWID was created in UTC to the nearest minute.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Domain      | The domain that is associated with the Creator of the OWID. The registration information associated with the domain must provide contact details for other entities seeking to consume and verify the OWID. The domain can not be marked private or hidden behind a registrar. Well known end points must be exposed by the domain to support retrieval of the Processor’s common name, or public keys. Optional end points might be provided to support verification of OWIDs. See [End Points](\#\\End Points). The number of characters used for a domain should be as small as possible. As such it is expected OWID creators |
 | Implementor | The entity that implements OWID. May be the same as the Creator or could be an agent operating on behalf of the Creator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Parent      | OWID can be stand alone and not relate to other OWIDs. Where an OWID is dependent on another OWID then a parent child relationship is formed. The OWIDs could be considered to form a tree.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -162,14 +166,14 @@ transaction. For advertising supply chain audit this use case is covered in
 
 OWIDs are stored in the following data structure.
 
-| Field          | Bytes                                            | Data Type               | Description                                                                                                                                                                                                                                                                                                               |
-|----------------|--------------------------------------------------|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Version        | 1                                                | Byte                    | The byte version of the OWID. Version 1 only.                                                                                                                                                                                                                                                                             |
-| Domain         | Length of string plus 1 for null (0) terminator. | String                  | Domain associated with the creator.                                                                                                                                                                                                                                                                                       |
-| Date           | 2                                                | Unsigned 16 bit integer | The number of days that have elapsed since 01/01/2020 in UTC. Therefore the 01/01/2021 would be 365. The field is included primarily for the purposes of changing signing keys on a daily basis. If a more precise timestamp is important to a particular purpose then the payload can be used to store this information. |
-| Payload length | 4                                                | Unsigned 32 bit integer | Number of bytes that form the payload                                                                                                                                                                                                                                                                                     |
-| Payload        | See Payload length                               | Byte array              | Bytes that form the payload, if any.                                                                                                                                                                                                                                                                                      |
-| Signature      | 64                                               | Byte array              | A 64 byte array containing the signature.                                                                                                                                                                                                                                                                                 |
+| Field          | Bytes                                            | Data Type               | Description                                                                                                                                                                                                                                                                                                        |
+|----------------|--------------------------------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Version        | 1                                                | Byte                    | The byte version of the OWID. Note: Version 1and 2 have been deprecated during development as they used RSA which was considered insecure during initial review, or contained an insufficiently precise time indicator.                                                                                            |
+| Domain         | Length of string plus 1 for null (0) terminator. | String                  | Domain associated with the creator.                                                                                                                                                                                                                                                                                |
+| Date           | 4                                                | Unsigned 32 bit integer | The number of minutes that have elapsed since 01/01/2020 in UTC. Therefore the 01/01/2021 would be 365. The field is included for the purposes of changing signing keys, and resolve conflicts where multiple data items of the same type exist for a web browser and the most recent OWID needs to be determined. |
+| Payload length | 4                                                | Unsigned 32 bit integer | Number of bytes that form the payload                                                                                                                                                                                                                                                                              |
+| Payload        | See Payload length                               | Byte array              | Bytes that form the payload, if any.                                                                                                                                                                                                                                                                               |
+| Signature      | 64                                               | Byte array              | A 64 byte array containing the ECDSA signature.                                                                                                                                                                                                                                                                    |
 
 The minimum size of an OWID with a domain of six characters, for example 51d.io
 or opx.io, and no payload is 77 bytes. If 1000 processors, all using six
@@ -195,12 +199,12 @@ Each OWID creator must host a domain with a number of well-known end points to
 be used by other participants in an OWID compliant transaction. The following
 table describes the end points.
 
-| End Point               | Requirement | Parameters                                                                                                                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|-------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| /owid/api/v1/creator    | Mandatory   |                                                                                                                                | Provides a JSON response with the OWID creator information. The fields returned must include the domain, common name and public key that is also available via the public-key end point. The following is an example JSON response for the domain [new-pork-limes.uk](https://new-pork-limes.uk/owid/api/v1/creator). {  "domain": "new-pork-limes.uk",  "name": "New Pork Limes",  "publicKeySPKI": "…" }  Other fields could be included in time such as the [DUNS number](https://www.dnb.co.uk/duns-number/lookup.html), [registered company number](https://find-and-update.company-information.service.gov.uk/), or the URL of the applicable privacy policy.  |
-| /owid/api/v1/public-key | Mandatory   | format: valid values are “spki” or “pkcs”                                                                                      | Returns the public key associated with the creator in Subject Public Key Info (SPKI) or Public Key Cryptography Standards (PKCS) form. The response is a text string in RSA Public Key form. For example: -----BEGIN RSA PUBLIC KEY----- MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJ8pVQDNLQ3xaBJc6ey6/rA/zrPytDbp\\naaIyBC99DECMzbTffXG7DHsuqKmQjbPUAUYa+66dW7UIzlU6avt1/XsCAwEAAQ== -----END RSA PUBLIC KEY----- Issue: It is likely that the date will also form part of the request to enable OWID creators to change keys on a daily basis. This is a future enhancement.                                                                                                |
-| /owid/register          | Optional    |                                                                                                                                | Used to register a domain as supporting OWID. Provides a simple user interface to capture the name of the organisation. This name is returned when the creator endpoint is called. Once the domain has been registered this end point should no longer respond. It is provided to avoid operations staff needing to be provided access to persistent storage or be involved in the creating of the keys.                                                                                                                                                                                                                                                             |
-| /owid/api/v1/verify     | Optional    | OWID: the OWID as a base 64 URL encoded string. Parent (optional): another OWID that might have been used to create this OWID. | May be provided to support verification by entities that do not support public key verification. For reasons of latency and operational cost use of this end point in production is discouraged.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| End Point               | Requirement | Parameters                                                                                                                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|-------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /owid/api/v3/creator    | Mandatory   |                                                                                                                                | Provides a JSON response with the OWID creator information. The fields returned must include the domain, common name and public key that is also available via the public-key end point. The following is an example JSON response for the domain [new-pork-limes.uk](https://new-pork-limes.uk/owid/api/v1/creator). { "domain": "new-pork-limes.uk", "name": "New Pork Limes", "publicKeySPKI": "…" } Other fields could be included in time such as the [DUNS number](https://www.dnb.co.uk/duns-number/lookup.html), [registered company number](https://find-and-update.company-information.service.gov.uk/), or the URL of the applicable privacy policy. |
+| /owid/api/v3/public-key | Mandatory   | format: valid values are “spki” or “pkcs”                                                                                      | Returns the public key associated with the creator in Subject Public Key Info (SPKI) or Public Key Cryptography Standards (PKCS) form. The response is a text string in ECDSA Public Key form. For example: -----BEGIN PUBLIC KEY----- MFwwDQYJKo… /zrPytDbp\\naa == -----END PUBLIC KEY----- Issue: It is likely that the date will also form part of the request to enable OWID creators to change keys on a daily basis. This is a future enhancement.                                                                                                                                                                                                       |
+| /owid/register          | Optional    |                                                                                                                                | Used to register a domain as supporting OWID. Provides a simple user interface to capture the name of the organisation. This name is returned when the creator endpoint is called. Once the domain has been registered this end point should no longer respond. It is provided to avoid operations staff needing to be provided access to persistent storage or be involved in the creating of the keys.                                                                                                                                                                                                                                                        |
+| /owid/api/v3/verify     | Optional    | OWID: the OWID as a base 64 URL encoded string. Parent (optional): another OWID that might have been used to create this OWID. | May be provided to support verification by entities that do not support public key verification. For reasons of latency and operational cost use of this end point in production is discouraged.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 If the mandatory end points are not provided the other participants in an OWID
 transaction should ignore the OWID for the purposes of verification and inform
@@ -208,10 +212,20 @@ the registered domain owner that the OWID end points did not respond.
 
 ### Verification
 
+This specification does not require parties to verify OWIDs when they are
+received or use. They have the option of doing so only if they wish. Therefore,
+a policy could be supported where a fraction of OWIDs are verified at random.
+
+Verification is recommended via the use of the published public key of the OWID
+creator. The specification supports an optional end point operated by the OWID
+creator at the domain used in the OWID to provide a verification service. This
+could be used in web browsers that do not support ECDSA cryptography.
+
 The number of processors in a OWID compliant transaction are likely to be
 relatively small in computing terms. In a use case involving participants in an
-auction transaction a reasonable limit might be 1000 participants. On any given
-day a total of 1000 public keys will be needed to verify the other OWID
+auction transaction a reasonable limit might be 1000 participants excluding the
+originating publisher. Assuming keys are changed daily, on any given day a total
+of 1000 public keys will be needed to verify the non-publisher OWID
 participants.
 
 It is expected that verifiers of OWIDs will maintain a local copy of public keys
@@ -220,7 +234,9 @@ endpoint of the other processors.
 
 ## Assumptions
 
-OWID assumes the relationship between a domain and an processing entity can be
+OWID assumes the relationship between a domain and a processing entity can be
 established via the existing infrastructure for DNS and SSL certificates. If
-this proves un true then it would be possible for a bad actor to temporarily
-impersonate another entity via hijacking the domains of others.
+this proves untrue then it would be possible for a bad actor to temporarily
+impersonate another entity via hijacking the domains of others. This is
+considered unlikely and would indicate a wider failure of internet protocols and
+practices.

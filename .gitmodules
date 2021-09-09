@@ -2,3 +2,9 @@
 	path = go
 	url = https://github.com/SWAN-community/owid-go.git
 	branch = main
+[submodule "dotnet"]
+	path = dotnet
+	url = https://github.com/SWAN-community/owid-dotnet.git
+[submodule "js"]
+	path = js
+	url = https://github.com/SWAN-community/owid-js.git
