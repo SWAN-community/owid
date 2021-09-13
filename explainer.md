@@ -102,10 +102,13 @@ data structures. Using a single algorithm reduces implementation complexity.
 
 ## Standards
 
-OWID is dependent on the following IETF standards.
+OWID is dependent on the following standards.
 
 -   ECDSA NIST P-256 (FIPS 186-3, section D.2.3), also known as secp256r1 or
     prime256v1
+-   Secure Hash Algorithm SHA-256 (FIPS 180-2, section 6.2)
+
+SHA-256 is a robust hashing algorithm and widely supported.
 
 P-256 has been chosen because of the relatively large number of programming
 languages and libraries that offer support. Simple and consistent
@@ -116,8 +119,8 @@ As the algorithm is only used to sign and verify data the encryption drawbacks
 are mitigated. The computing costs associated with a bad actor faking signatures
 at scale is likely to be unjustifiably expensive.
 
-Future versions of OWID could use a different cryptographic algorithm or larger
-sizes. If auditors require a more modern algorithm this could be included in the
+Future versions of OWID could use a different cryptographic algorithms or larger
+sizes. If auditors require more modern algorithms this could be included in the
 first deployed version.
 
 ## Out of Scope
@@ -179,6 +182,10 @@ The minimum size of an OWID with a domain of six characters, for example 51d.io
 or opx.io, and no payload is 77 bytes. If 1000 processors, all using six
 characters domains, were involved in a single transaction the bytes consumed by
 the associated OWID data that would result would be 77,000 bytes or 77kb.
+
+## Signature
+
+The signing algorithm first generates a SHA-256 digest of an OWID data structure without the signature field, and then signs it using the P-256 private key. This 64-byte signature is then appended to the original data to create the final OWID.
 
 ## Trees
 
