@@ -27,6 +27,7 @@ Concrete implementations of OWID are available in the following repositories.
 -   [.NET](https://github.com/SWAN-community/owid-dotnet) (version 5+)
 -   [Go](https://github.com/SWAN-community/owid-go)
 -   [JavaScript](https://github.com/SWAN-community/owid-js) (verify only)
+-   [Rust](https://github.com/SWAN-community/owid-rust)
 
 ## Pre-requisites
 

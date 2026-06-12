@@ -8,3 +8,6 @@
 [submodule "js"]
 	path = js
 	url = https://github.com/SWAN-community/owid-js.git
+[submodule "rust"]
+	path = rust
+	url = https://github.com/SWAN-community/owid-rust.git
