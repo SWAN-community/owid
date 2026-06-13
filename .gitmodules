@@ -11,3 +11,12 @@
 [submodule "rust"]
 	path = rust
 	url = https://github.com/SWAN-community/owid-rust.git
+[submodule "java"]
+	path = java
+	url = https://github.com/SWAN-community/owid-java.git
+[submodule "python"]
+	path = python
+	url = https://github.com/SWAN-community/owid-python.git
+[submodule "php"]
+	path = php
+	url = https://github.com/SWAN-community/owid-php.git

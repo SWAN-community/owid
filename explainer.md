@@ -28,6 +28,9 @@ Concrete implementations of OWID are available in the following repositories.
 -   [Go](https://github.com/SWAN-community/owid-go)
 -   [JavaScript](https://github.com/SWAN-community/owid-js) (verify only)
 -   [Rust](https://github.com/SWAN-community/owid-rust)
+-   [Java](https://github.com/SWAN-community/owid-java)
+-   [Python](https://github.com/SWAN-community/owid-python)
+-   [PHP](https://github.com/SWAN-community/owid-php)
 
 ## Pre-requisites
 
