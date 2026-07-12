@@ -223,6 +223,27 @@ If the mandatory end points are not provided the other participants in an OWID
 transaction should ignore the OWID for the purposes of verification and inform
 the registered domain owner that the OWID end points did not respond.
 
+### Authentication
+
+This specification does not require authentication on any end point, and a
+creator MUST NOT be considered non-conformant either for requiring
+authentication on the creator and public-key end points or for serving them
+openly. A creator might require authentication where, for example, access to
+the public key is part of a commercial subscription.
+
+- An OWID creator MAY require authentication on the creator and public-key
+  end points.
+- A creator that requires authentication SHOULD accept the credential in each
+  of these places: an HTTP request header, the query string, and the form
+  body of a POST. The header and parameter names are chosen by the creator;
+  for example an `X-Api-Key` header and a `key` parameter.
+- When no credential is presented, a creator that requires authentication
+  SHOULD respond with HTTP status code 401 and a body that describes every
+  accepted way of supplying the credential.
+- OWID clients MUST be prepared for both cases: a 200 response from a creator
+  that serves these end points openly, and a 401 response with instructions
+  from a creator that requires authentication.
+
 ### Verification
 
 This specification does not require parties to verify OWIDs when they are
